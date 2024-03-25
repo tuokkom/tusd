@@ -548,7 +548,8 @@ func (handler *UnroutedHandler) PostFileV2(w http.ResponseWriter, r *http.Reques
 	// Send 104 response
 	w.Header().Set("Location", url)
 	w.Header().Set("Upload-Draft-Interop-Version", string(currentUploadDraftInteropVersion))
-	w.WriteHeader(104)
+	// ilaripih: Commented out for now because nginx cannot handle 1XX responses properly
+	// w.WriteHeader(104)
 
 	handler.Metrics.incUploadsCreated()
 	c.log = c.log.With("id", id)
