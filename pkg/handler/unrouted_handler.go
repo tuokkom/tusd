@@ -28,6 +28,7 @@ const (
 	interopVersion3 draftVersion = "3" // From draft version -01
 	interopVersion4 draftVersion = "4" // From draft version -02
 	interopVersion5 draftVersion = "5" // From draft version -03
+	interopVersion6 draftVersion = "6" // From draft version -04
 )
 
 var (
@@ -548,7 +549,8 @@ func (handler *UnroutedHandler) PostFileV2(w http.ResponseWriter, r *http.Reques
 	// Send 104 response
 	w.Header().Set("Location", url)
 	w.Header().Set("Upload-Draft-Interop-Version", string(currentUploadDraftInteropVersion))
-	w.WriteHeader(104)
+	// ilaripih: Commented out for now because nginx cannot handle 1XX responses properly
+	// w.WriteHeader(104)
 
 	handler.Metrics.incUploadsCreated()
 	c.log = c.log.With("id", id)
@@ -1367,7 +1369,7 @@ func (handler UnroutedHandler) usesIETFDraft(r *http.Request) bool {
 func getIETFDraftInteropVersion(r *http.Request) draftVersion {
 	version := draftVersion(r.Header.Get("Upload-Draft-Interop-Version"))
 	switch version {
-	case interopVersion3, interopVersion4, interopVersion5:
+	case interopVersion3, interopVersion4, interopVersion5, interopVersion6:
 		return version
 	default:
 		return ""
@@ -1379,7 +1381,7 @@ func getIETFDraftInteropVersion(r *http.Request) draftVersion {
 func isIETFDraftUploadComplete(r *http.Request) bool {
 	currentUploadDraftInteropVersion := getIETFDraftInteropVersion(r)
 	switch currentUploadDraftInteropVersion {
-	case interopVersion4, interopVersion5:
+	case interopVersion4, interopVersion5, interopVersion6:
 		return r.Header.Get("Upload-Complete") == "?1"
 	case interopVersion3:
 		return r.Header.Get("Upload-Incomplete") == "?0"
@@ -1400,7 +1402,7 @@ func setIETFDraftUploadComplete(r *http.Request, resp HTTPResponse, isComplete b
 		} else {
 			resp.Header["Upload-Incomplete"] = "?1"
 		}
-	case interopVersion4, interopVersion5:
+	case interopVersion4, interopVersion5, interopVersion6:
 		if isComplete {
 			resp.Header["Upload-Complete"] = "?1"
 		} else {
